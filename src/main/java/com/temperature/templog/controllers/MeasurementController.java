@@ -14,6 +14,11 @@ import com.temperature.templog.models.Measurement;
 public class MeasurementController {
     DAO dao = new DAO();
 
+    @RequestMapping("/measurements")
+    public List<Measurement> measurements() {
+        return dao.getAllMeasurements();
+    }
+
     @RequestMapping("/measurements/temperature")
     public List<Measurement> temperatures() {
         return dao.getAllMeasurements("temperature");
@@ -26,6 +31,7 @@ public class MeasurementController {
 
     @RequestMapping("/measurements/{type}/{section}")
     public List<Measurement> temperaturesSection(@PathVariable String section, @PathVariable String type) {
+        // Hard coded if statements so no sql injection is possible
         if (section.equals("a") && type.equals("temperature")) {
             return dao.getAllMeasurements("temperature", "a");
         } else if (section.equals("b") && type.equals("temperature")) {
