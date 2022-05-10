@@ -3,9 +3,13 @@ package com.temperature.templog.controllers;
 import com.temperature.templog.repositories.DAO;
 
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.temperature.templog.models.Measurement;
@@ -13,6 +17,7 @@ import com.temperature.templog.models.Measurement;
 @RestController
 public class MeasurementController {
     DAO dao = new DAO();
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @RequestMapping("/measurements")
     public List<Measurement> measurements() {
@@ -47,5 +52,11 @@ public class MeasurementController {
         } else {
             return null;
         }
+    }
+
+    @PostMapping("/measurement/add")
+    public void addMeasurement(@RequestBody Measurement measurement) {
+        dao.addMeasurement(new Measurement(measurement.getValue(), LocalDateTime.now(), measurement.getType(),
+                measurement.getSection()));
     }
 }

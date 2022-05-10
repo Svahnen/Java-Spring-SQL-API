@@ -3,8 +3,11 @@ package com.temperature.templog.repositories;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -15,6 +18,7 @@ public class DAO {
 
     Properties p = new Properties();
     Connection con;
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public DAO() {
         try {
@@ -27,56 +31,59 @@ public class DAO {
     }
 
     public List<Measurement> getAllMeasurements() {
-        List<Measurement> allTemperatures = new ArrayList<>();
+        List<Measurement> allMeasurements = new ArrayList<>();
 
         try (Statement stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(
                         "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype")) {
             while (rs.next()) {
-                allTemperatures
-                        .add(new Measurement(rs.getInt("id"), rs.getFloat("value"), rs.getDate("date").toLocalDate(),
+                allMeasurements
+                        .add(new Measurement(rs.getInt("id"), rs.getFloat("value"),
+                                LocalDateTime.parse(rs.getString("date"), dateTimeFormatter),
                                 rs.getString("type"), rs.getString("section")));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return allTemperatures;
+        return allMeasurements;
     }
 
     public List<Measurement> getAllMeasurements(String type) {
-        List<Measurement> allTemperatures = new ArrayList<>();
+        List<Measurement> allMeasurements = new ArrayList<>();
 
         try (Statement stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(
                         "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype and type.type = '"
                                 + type + "'")) {
             while (rs.next()) {
-                allTemperatures
-                        .add(new Measurement(rs.getInt("id"), rs.getFloat("value"), rs.getDate("date").toLocalDate(),
+                allMeasurements
+                        .add(new Measurement(rs.getInt("id"), rs.getFloat("value"),
+                                LocalDateTime.parse(rs.getString("date"), dateTimeFormatter),
                                 rs.getString("type"), rs.getString("section")));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return allTemperatures;
+        return allMeasurements;
     }
 
     public List<Measurement> getAllMeasurements(String type, String section) {
-        List<Measurement> allTemperatures = new ArrayList<>();
+        List<Measurement> allMeasurements = new ArrayList<>();
 
         try (Statement stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(
                         "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype and type.type = '"
                                 + type + "' and section.name = '" + section + "'")) {
             while (rs.next()) {
-                allTemperatures
-                        .add(new Measurement(rs.getInt("id"), rs.getFloat("value"), rs.getDate("date").toLocalDate(),
+                allMeasurements
+                        .add(new Measurement(rs.getInt("id"), rs.getFloat("value"),
+                                LocalDateTime.parse(rs.getString("date"), dateTimeFormatter),
                                 rs.getString("type"), rs.getString("section")));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return allTemperatures;
+        return allMeasurements;
     }
 
     /* 
@@ -96,42 +103,37 @@ public class DAO {
             e.printStackTrace();
         }
         return false;
-    }
-    
-    public boolean updateChild(Child c) {
-    
-        String queryUpdate = "UPDATE child SET name = ?, address = ?, countryId = ?, nice = ? WHERE id = ?";
-        String queryInsert = "insert into child (name, address, countryId, nice) values (?, ?, ?, ?)";
-        int rowChanged = -1;
-    
-        try (PreparedStatement stmtUpdate = con.prepareStatement(queryUpdate);
-                PreparedStatement stmtInsert = con.prepareStatement(queryInsert)) {
-    
-            stmtUpdate.setString(1, c.getName());
-            stmtUpdate.setString(2, c.getAddress());
-            stmtUpdate.setString(3, c.getCountryId());
-            stmtUpdate.setBoolean(4, c.isNice());
-            stmtUpdate.setInt(5, c.getId());
-            rowChanged = stmtUpdate.executeUpdate(); // Returns 1 if successful
-            System.out.println("child, rowChanged " + rowChanged);
-    
-            //Not found, insert (add new child)
-            if (rowChanged == 0) {
-                stmtInsert.setString(1, c.getName());
-                stmtInsert.setString(2, c.getAddress());
-                stmtInsert.setString(3, c.getCountryId());
-                stmtInsert.setBoolean(4, c.isNice());
-                rowChanged = stmtInsert.executeUpdate();
-                System.out.println("Adding new child " + c.getName());
+    }*/
+
+    public int addMeasurement(Measurement m) {
+
+        String queryInsert = "insert into measurement (value, date, idtype, idsection) values (?, ?, ?, ?)";
+
+        try (PreparedStatement stmtInsert = con.prepareStatement(queryInsert)) {
+
+            stmtInsert.setFloat(1, m.getValue());
+            stmtInsert.setString(2, m.getDate().format(dateTimeFormatter));
+
+            //TODO: a better fix for this
+            if (m.getType().equals("temperature")) {
+                stmtInsert.setInt(3, 1);
+            } else if (m.getType().equals("humidity")) {
+                stmtInsert.setInt(3, 2);
             }
-            if (rowChanged == 1) { //Row was updated
-                return true;
+            if (m.getSection().equals("a")) {
+                stmtInsert.setInt(4, 1);
+            } else if (m.getSection().equals("b")) {
+                stmtInsert.setInt(4, 2);
+            } else if (m.getSection().equals("c")) {
+                stmtInsert.setInt(4, 3);
             }
-    
+
+            return stmtInsert.executeUpdate(); // Returns 1 if successful
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
-    } */
+        return 0;
+    }
 
 }
