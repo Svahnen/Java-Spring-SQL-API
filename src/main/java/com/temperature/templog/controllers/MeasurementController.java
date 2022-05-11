@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.temperature.templog.models.Measurement;
+import com.temperature.templog.models.Price;
 
 @RestController
 public class MeasurementController {
@@ -70,8 +71,13 @@ public class MeasurementController {
     }
 
     @PostMapping("/measurement/add")
-    public void addMeasurement(@RequestBody Measurement measurement) {
-        dao.addMeasurement(new Measurement(measurement.getValue(), LocalDateTime.now(), measurement.getType(),
+    public int addMeasurement(@RequestBody Measurement measurement) {
+        return dao.addMeasurement(new Measurement(measurement.getValue(), LocalDateTime.now(), measurement.getType(),
                 measurement.getSection()));
+    }
+
+    @PostMapping("/price/add")
+    public int addPrice(@RequestBody Price Price) {
+        return dao.addPrice(new Price(Price.getPrice(), LocalDateTime.now()));
     }
 }

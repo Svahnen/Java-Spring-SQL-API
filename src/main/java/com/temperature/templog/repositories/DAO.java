@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Properties;
 
 import com.temperature.templog.models.Measurement;
+import com.temperature.templog.models.Price;
 
 public class DAO {
 
@@ -162,6 +163,20 @@ public class DAO {
 
             return stmtInsert.executeUpdate(); // Returns 1 if successful
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int addPrice(Price p) {
+        String query = "insert into price (price, date) values (?, ?)";
+
+        try (PreparedStatement stmt = con.prepareStatement(query);) {
+            stmt.setFloat(1, p.getPrice());
+            stmt.setString(2, p.getDate().format(dateTimeFormatter));
+
+            return stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
