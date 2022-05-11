@@ -86,15 +86,13 @@ public class DAO {
         return allMeasurements;
     }
 
-    /* 
-    public boolean deleteChild(int id) {
+    public boolean deleteMeasurement(int id) {
         int rowChanged = 0;
-        String query = "delete from child where id = ? ";
-    
+        String query = "delete from measurement where idmeasurement = ? ";
+
         try (PreparedStatement stmt = con.prepareStatement(query)) {
-    
+
             stmt.setInt(1, id);
-            System.out.println("deleted child " + id);
             rowChanged = stmt.executeUpdate();
             if (rowChanged == 1) {
                 return true;
@@ -103,7 +101,22 @@ public class DAO {
             e.printStackTrace();
         }
         return false;
-    }*/
+    }
+
+    public Measurement getMeasurement(int id) {
+        try (Statement stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(
+                        "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype and measurement.idmeasurement = 2")) {
+            while (rs.next()) {
+                return new Measurement(rs.getInt("id"), rs.getFloat("value"),
+                        LocalDateTime.parse(rs.getString("date"), dateTimeFormatter),
+                        rs.getString("type"), rs.getString("section"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Measurement();
+    }
 
     public int addMeasurement(Measurement m) {
 

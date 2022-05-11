@@ -34,6 +34,16 @@ public class MeasurementController {
         return dao.getAllMeasurements("moisture");
     }
 
+    @RequestMapping("/measurement/{id}/delete")
+    public boolean deleteMeasurement(@PathVariable int id) {
+        return dao.deleteMeasurement(id);
+    }
+
+    @RequestMapping("/measurement/{id}")
+    public Measurement getMeasurement(@PathVariable int id) {
+        return dao.getMeasurement(id);
+    }
+
     @RequestMapping("/measurements/{type}/{section}")
     public List<Measurement> temperaturesSection(@PathVariable String section, @PathVariable String type) {
         // Hard coded if statements so no sql injection is possible
