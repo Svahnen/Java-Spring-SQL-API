@@ -129,7 +129,7 @@ public class DAO {
             stmtInsert.setFloat(1, m.getValue());
             stmtInsert.setString(2, m.getDate().format(dateTimeFormatter));
 
-            //TODO: a better fix for this
+            //TODO: a better fix for this is to use a lookup table
             if (m.getType().equals("temperature")) {
                 stmtInsert.setInt(3, 1);
             } else if (m.getType().equals("humidity")) {
