@@ -17,7 +17,7 @@ import com.temperature.templog.models.Price;
 
 @RestController
 public class MeasurementController {
-    DAO dao = new DAO();
+    DAO dao = DAO.getInstance();
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @RequestMapping("/measurements")
@@ -79,5 +79,10 @@ public class MeasurementController {
     @PostMapping("/price/add")
     public int addPrice(@RequestBody Price Price) {
         return dao.addPrice(new Price(Price.getPrice(), LocalDateTime.now()));
+    }
+
+    @RequestMapping("/prices")
+    public List<Price> prices() {
+        return dao.getAllPrices();
     }
 }

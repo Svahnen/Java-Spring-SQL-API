@@ -16,6 +16,7 @@ import com.temperature.templog.models.Measurement;
 import com.temperature.templog.models.Price;
 
 public class DAO {
+    private static DAO single_instance = null;
 
     Properties p = new Properties();
     Connection con;
@@ -29,6 +30,13 @@ public class DAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static DAO getInstance() {
+        if (single_instance == null)
+            single_instance = new DAO();
+
+        return single_instance;
     }
 
     public List<Measurement> getAllMeasurements() {
@@ -181,6 +189,38 @@ public class DAO {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public List<Price> getAllPrices() {
+        List<Price> allPrices = new ArrayList<>();
+
+        try (Statement stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(
+                        "SELECT * FROM temperature.price;")) {
+            while (rs.next()) {
+                allPrices
+                        .add(new Price(rs.getInt("idprice"), rs.getFloat("price"),
+                                LocalDateTime.parse(rs.getString("date"), dateTimeFormatter)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return allPrices;
+    }
+
+    public Price getLatestPrice() {
+        String query = "SELECT * FROM temperature.price order by date desc limit 1;";
+
+        try (PreparedStatement stmt = con.prepareStatement(query);) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                return new Price(rs.getInt("idprice"), rs.getFloat("price"),
+                        LocalDateTime.parse(rs.getString("date"), dateTimeFormatter));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Price();
     }
 
 }
