@@ -104,9 +104,11 @@ public class DAO {
     }
 
     public Measurement getMeasurement(int id) {
-        try (Statement stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery(
-                        "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype and measurement.idmeasurement = 2")) {
+        String query = "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype and measurement.idmeasurement = ?";
+
+        try (PreparedStatement stmt = con.prepareStatement(query);) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 return new Measurement(rs.getInt("id"), rs.getFloat("value"),
                         LocalDateTime.parse(rs.getString("date"), dateTimeFormatter),
