@@ -50,6 +50,11 @@ public class MeasurementController {
         return dao.getLatestMeasurement(type);
     }
 
+    @RequestMapping("/measurement/average/{type}/{section}")
+    public float getAverageMeasurement(@PathVariable String type, @PathVariable String section) {
+        return dao.getAverageMeasurement(type, section);
+    }
+
     @RequestMapping("/measurements/{type}/{section}")
     public List<Measurement> temperaturesSection(@PathVariable String section, @PathVariable String type) {
         // Hard coded if statements so no sql injection is possible

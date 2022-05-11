@@ -16,6 +16,22 @@
     <div th:text="${moisture.getValue()}" />
     <div th:text="${moisture.getSection()}" />
     <div th:text="${moisture.getDate()}" />
+    <h4>Latest temperatures per section (a/b/c)</h4>
+    <div th:text="${ALatestTemperature.getValue()}" />
+    <div th:text="${BLatestTemperature.getValue()}" />
+    <div th:text="${CLatestTemperature.getValue()}" />
+    <h4>Latest moistures per section (a/b/c)</h4>
+    <div th:text="${ALatestMoisture.getValue()}" />
+    <div th:text="${BLatestMoisture.getValue()}" />
+    <div th:text="${CLatestMoisture.getValue()}" />
+    <h4>Average temperature per section (a/b/c)</h4>
+    <div th:text="${AAverageTemperature}" />
+    <div th:text="${BAverageTemperature}" />
+    <div th:text="${CAverageTemperature}" />
+    <h4>Average moisture per section (a/b/c)</h4>
+    <div th:text="${AAverageMoisture}" />
+    <div th:text="${BAverageMoisture}" />
+    <div th:text="${CAverageMoisture}" />
 
 
     <h4>Add measurement</h4>

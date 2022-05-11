@@ -146,6 +146,46 @@ public class DAO {
         return new Measurement();
     }
 
+    public Measurement getLatestMeasurement(String type, String section) {
+        String query = "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype and type.type = ? and measurement.idsection = ? order by measurement.date desc limit 1";
+
+        try (PreparedStatement stmt = con.prepareStatement(query);) {
+            stmt.setString(1, type);
+            if (section.equals("a")) {
+                stmt.setInt(2, 1);
+            } else if (section.equals("b")) {
+                stmt.setInt(2, 2);
+            } else if (section.equals("c")) {
+                stmt.setInt(2, 3);
+            }
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                return new Measurement(rs.getInt("id"), rs.getFloat("value"),
+                        LocalDateTime.parse(rs.getString("date"), dateTimeFormatter),
+                        rs.getString("type"), rs.getString("section"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Measurement();
+    }
+
+    public float getAverageMeasurement(String type, String section) {
+        String query = "SELECT AVG (value) FROM measurement inner join section on measurement.idsection=section.idsection inner join type on measurement.idtype=type.idtype where type.type = ? and section.name = ?";
+
+        try (PreparedStatement stmt = con.prepareStatement(query);) {
+            stmt.setString(1, type);
+            stmt.setString(2, section);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                return rs.getFloat(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public int addMeasurement(Measurement m) {
 
         String queryInsert = "insert into measurement (value, date, idtype, idsection) values (?, ?, ?, ?)";
