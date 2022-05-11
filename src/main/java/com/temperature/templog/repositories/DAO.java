@@ -120,6 +120,23 @@ public class DAO {
         return new Measurement();
     }
 
+    public Measurement getLatestMeasurement(String type) {
+        String query = "select measurement.idmeasurement 'id', measurement.value 'value', measurement.date 'date', type.type 'type', section.name 'section' from measurement, type, section where measurement.idsection = section.idsection and measurement.idtype = type.idtype and type.type = ? order by measurement.date desc limit 1";
+
+        try (PreparedStatement stmt = con.prepareStatement(query);) {
+            stmt.setString(1, type);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                return new Measurement(rs.getInt("id"), rs.getFloat("value"),
+                        LocalDateTime.parse(rs.getString("date"), dateTimeFormatter),
+                        rs.getString("type"), rs.getString("section"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Measurement();
+    }
+
     public int addMeasurement(Measurement m) {
 
         String queryInsert = "insert into measurement (value, date, idtype, idsection) values (?, ?, ?, ?)";
@@ -132,7 +149,7 @@ public class DAO {
             //TODO: a better fix for this is to use a lookup table
             if (m.getType().equals("temperature")) {
                 stmtInsert.setInt(3, 1);
-            } else if (m.getType().equals("humidity")) {
+            } else if (m.getType().equals("moisture")) {
                 stmtInsert.setInt(3, 2);
             }
             if (m.getSection().equals("a")) {
